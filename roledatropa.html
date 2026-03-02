@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rolê da Tropa</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #d9d9d9;
+            height: 100vh;
+            display: flex;
+            justify-content:center;
+            align-items:center;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            transition: opacity 0.8s;
+        }
+
+        /* Ajuste para telas de celular */
+        .video-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 360px;
+            max-height: 640px;
+            position: relative;
+            background: #d9d9d9;
+            overflow: hidden;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -250%);
+            width: 85%;
+            background: #fff;
+            border-radius: 40px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s;
+        }
+
+        .google-logo { width: 22px; height: 22px; margin-right: 12px; }
+
+        input {
+            border: none;
+            outline: none;
+            font-size: 16px;
+            flex: 1;
+            background: transparent;
+        }
+
+        .icons { display: flex; align-items: center; gap: 12px; }
+        .icon { width: 20px; height: 20px; }
+
+        .cursor {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+            transition: all 0.7s ease-in-out;
+        }
+
+        .loading-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .loading-text { font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+
+        .loading-bar { display: flex; gap: 5px; border: 2px solid #000; padding: 5px; }
+
+        .block {
+            width: 15px;
+            height: 22px;
+            background: #0a0f2c;
+            opacity: 0.1;
+            transition: opacity 0.1s;
+        }
+
+        .block.active { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="video-container">
+    <div class="search-container" id="searchContainer">
+        <svg class="google-logo" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.74 1.22 9.26 3.6l6.92-6.92C35.94 2.6 30.36 0 24 0 14.64 0 6.56 5.64 2.88 13.84l8.06 6.26C13.26 13.6 18.2 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.14 24.5c0-1.64-.14-3.22-.4-4.74H24v9h12.48c-.54 2.92-2.2 5.4-4.7 7.08l7.3 5.68C43.98 37.3 46.14 31.4 46.14 24.5z"/>
+            <path fill="#FBBC05" d="M10.94 28.1c-.48-1.42-.76-2.92-.76-4.6s.28-3.18.76-4.6l-8.06-6.26C1.04 16.6 0 20.2 0 23.5s1.04 6.9 2.88 9.86l8.06-6.26z"/>
+            <path fill="#34A853" d="M24 48c6.36 0 11.94-2.1 15.92-5.7l-7.3-5.68c-2.02 1.36-4.62 2.18-8.62 2.18-5.8 0-10.74-4.1-12.5-9.6l-8.06 6.26C6.56 42.36 14.64 48 24 48z"/>
+        </svg>
+        <input type="text" id="searchInput" readonly>
+        <div class="icons">
+            <svg class="icon" id="searchIcon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7" stroke="#4285F4" stroke-width="2" fill="none"/>
+                <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#4285F4" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24">
+        <path fill="black" d="M2 2l20 10-8 2-2 8z"/>
+    </svg>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-text">LOADING...</div>
+        <div class="loading-bar" id="loadingBar"></div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const iniciar = () => {
+        const searchContainer = document.getElementById("searchContainer");
+        const searchInput = document.getElementById("searchInput");
+        const cursor = document.getElementById("cursor");
+        const searchIcon = document.getElementById("searchIcon");
+        const loadingScreen = document.getElementById("loadingScreen");
+        const loadingBar = document.getElementById("loadingBar");
+        
+        const text = "Momentos do Rolê da Tropa";
+        // Altere para o nome do arquivo que você quer abrir:
+        const linkFinal = "proxima_pagina.html"; 
+
+        loadingBar.innerHTML = '';
+        for(let i=0; i<10; i++) {
+            const block = document.createElement("div");
+            block.classList.add("block");
+            loadingBar.appendChild(block);
+        }
+
+        // Início da animação
+        setTimeout(() => {
+            searchContainer.style.transform = "translate(-50%, -50%)";
+            
+            setTimeout(() => {
+                let i = 0;
+                const digitar = () => {
+                    if (i < text.length) {
+                        searchInput.value += text.charAt(i);
+                        i++;
+                        setTimeout(digitar, 60);
+                    } else {
+                        const iconRect = searchIcon.getBoundingClientRect();
+                        const contRect = document.querySelector(".video-container").getBoundingClientRect();
+                        cursor.style.opacity = "1";
+                        cursor.style.top = (iconRect.top - contRect.top + 10) + "px";
+                        cursor.style.left = (iconRect.left - contRect.left + 10) + "px";
+                        
+                        setTimeout(() => {
+                            searchContainer.style.opacity = "0";
+                            cursor.style.opacity = "0";
+                            setTimeout(() => {
+                                loadingScreen.style.opacity = "1";
+                                let idx = 0;
+                                let interval = setInterval(() => {
+                                    if(idx < 10) {
+                                        document.querySelectorAll(".block")[idx].classList.add("active");
+                                        idx++;
+                                    } else {
+                                        clearInterval(interval);
+                                        setTimeout(() => {
+                                            document.body.style.opacity = "0";
+                                            setTimeout(() => { window.location.href = linkFinal; }, 800);
+                                        }, 500);
+                                    }
+                                }, 150);
+                            }, 500);
+                        }, 1200);
+                    }
+                };
+                digitar();
+            }, 800);
+        }, 500);
+    };
+
+    window.onload = iniciar;
+})();
+</script>
+
+</body>
+</html>
